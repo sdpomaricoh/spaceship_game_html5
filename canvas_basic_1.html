@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Canvas Fundaments</title>
+        <style>
+            canvas{
+                border: 1px solid black;
+                display: block;
+                margin-bottom: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="720" height="400">
+            your browser not support canvas
+        </canvas>
+        <input type="button" name="button" id="animate" value="Start">
+        <script type="text/javascript">
+            window.addEventListener('load',init);
+            function init(){
+                canvas     = document.getElementById("canvas");
+
+                var velocity   =  8,
+                    init       = false,
+                    direction  = velocity,
+                    x          = 50,
+                    y          = 20;
+
+                var interval;
+
+                if (canvas && canvas.getContext) {
+                    ctx    = canvas.getContext('2d'); // Define context in canvas
+                    if (ctx) {
+
+                        ctx.fillStyle ="rgb(200,0,0)";
+                        ctx.arc(x,y,10,0,7);
+                        ctx.fill();
+
+                        document.getElementById('animate').addEventListener('click', function(){
+                            if (init) {
+                                this.value ="Start";
+                                window.clearInterval(interval);
+                                init = false;
+                            } else {
+                                this.value = "Stop"
+                                interval   = window.setInterval(function(){
+                                    moveAndDraw(canvas,ctx);
+                                },32);
+                                init = true;
+                            }
+                        });
+
+                        function Draw(canvas,ctx,x,y){
+                            canvas.width = canvas.width;
+                            ctx.fillStyle ="rgb(200,0,0)";
+                            ctx.arc(x,y,10,0,7);
+                            ctx.fill();
+                        }
+
+                        function moveAndDraw(canvas,ctx){
+                            if (y > (canvas.height - 20)) direction = -velocity;
+                            if (y < 20) direction = velocity;
+                            y +=direction;
+                            Draw(canvas,ctx,x,y);
+                        }
+
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
