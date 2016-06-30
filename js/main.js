@@ -3,24 +3,29 @@ var canvas    = document.getElementById("game"),
     ctx       = canvas.getContext('2d');
 
 //define the variables of the background and images
-var bg;
+var bg,
 
 //define the variables of the Keywords events
-var keyword = {};
-// Spaceships object
+    keyword = {},
 
+//define the variables of the shots
+    shots = [],
+
+// Spaceships object
 spaceships = {
     x    :335,
     y    : canvas.height-120,
     width:50,
     height:50
-}
+};
 
 //load functions of the images and background
 function frameLoop() {
     moveSpaceships()
     drawBackground();
     drawShip();
+    movingShots();
+    drawShots()
 }
 
 function loadMedia(){
@@ -82,4 +87,45 @@ function moveSpaceships(){
             spaceships.x = limit;
         }
     }
+
+    if (keyword[32]) { // event of shot
+        if (!keyword.fire) {
+            fire();
+            keyword.fire = true;
+        }
+    }else{
+        keyword.fire = false;
+    }
+}
+
+// Shoot laser bullets :)
+function movingShots(){
+    for (var i in shots) {
+        shot = shots[i];
+        shot.y-=2;
+    }
+    //deleting shots
+    shots = shots.filter(function(shot){
+        return shot.y > 0
+    });
+}
+// Add shots
+function fire(){
+    shots.push({
+        x     : spaceships.x+20,
+        y     : spaceships.y-10,
+        width : 10,
+        height: 10
+    });
+}
+
+function drawShots(){
+    ctx.save();
+    ctx.fillStyle = "#FFFFFF";
+
+    for (var i in shots) {
+        shot = shots[i];
+        ctx.fillRect(shot.x,shot.y,shot.width,shot.height);
+    }
+    ctx.restore();
 }
