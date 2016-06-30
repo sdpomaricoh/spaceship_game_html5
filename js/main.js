@@ -5,7 +5,10 @@ var canvas    = document.getElementById("game"),
 //define the variables of the background and images
 var bg;
 
+//define the variables of the Keywords events
+var keyword = {};
 // Spaceships object
+
 spaceships = {
     x    :335,
     y    : canvas.height-120,
@@ -14,17 +17,18 @@ spaceships = {
 }
 
 //load functions of the images and background
+function frameLoop() {
+    moveSpaceships()
+    drawBackground();
+    drawShip();
+}
+
 function loadMedia(){
     bg        = new Image();
     bg.src    = 'img/bg.jpg';
     bg.onload = function(){
         var interval = window.setInterval(frameLoop, 1000/55);
     }
-}
-
-function frameLoop() {
-    drawBackground();
-    drawShip();
 }
 
 function drawBackground(){
@@ -39,3 +43,43 @@ function drawShip(){
 }
 
 loadMedia();
+
+//Keywords events
+
+function addKeywordsEvents(){
+    addEvents(document,'keydown',function(e){
+        keyword[e.keyCode] = true;
+    });
+    addEvents(document,"keyup",function(e){
+        keyword[e.keyCode] = false;
+        //debugger;
+    });
+
+    function addEvents(element, eventName, fn){
+        if (element.addEventListener) {
+            element.addEventListener(eventName,fn,false);
+        }else if (element.attachEvent) {
+            element.attachEvent(eventName,fn);
+        }
+    };
+}
+addKeywordsEvents();
+
+// Move Spaceships
+
+function moveSpaceships(){
+
+    if (keyword[37]) { // Move to left
+        spaceships.x -=10;
+        if (spaceships.x < 0) {
+            spaceships.x = 0;
+        }
+    }
+    if (keyword[39]) { // Move to Right
+        spaceships.x +=10;
+        limit = canvas.width - spaceships.width;
+        if (spaceships.x > limit) {
+            spaceships.x = limit;
+        }
+    }
+}
