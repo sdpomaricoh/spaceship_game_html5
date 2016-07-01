@@ -4,6 +4,13 @@ var canvas    = document.getElementById("game"),
 
 //define the variables of the background and images
 var bg,
+// define the enemies
+    enemies = [],
+
+//define the variables of the game object
+    game = {
+        status: "init"
+    },
 
 //define the variables of the Keywords events
     keyword = {},
@@ -25,7 +32,10 @@ function frameLoop() {
     drawBackground();
     drawShip();
     movingShots();
-    drawShots()
+    drawShots();
+    drawEnemies();
+    updateEnemies();
+    contactVerify();
 }
 
 function loadMedia(){
@@ -128,4 +138,91 @@ function drawShots(){
         ctx.fillRect(shot.x,shot.y,shot.width,shot.height);
     }
     ctx.restore();
+}
+
+//Add Enemies
+
+function drawEnemies(){
+    for (i  in enemies) {
+        var enemy = enemies[i];
+        ctx.save();
+        if (enemy.state=="alive") {
+            ctx.fillStyle ="#FF0000";
+        }else {
+            ctx.fillStyle ="#000000";
+        }
+        ctx.fillRect(enemy.x,enemy.y,enemy.width,enemy.height);
+        ctx.restore();
+    }
+}
+
+function updateEnemies(){
+    if (game.status == "init") {
+        for (var i = 0; i < 10; i++) {
+            enemies.push({
+                x: 10 + i*50,
+                y: 10,
+                width: 40,
+                height: 40,
+                state: "alive",
+                count: 0
+            });
+        }
+        game.status ="playing";
+    }
+    for (var i in enemies) {
+        var enemy = enemies[i];
+        if (!enemy) continue;
+        if(enemy && enemy.state=="alive"){
+            enemy.count++;
+            enemy.x += Math.sin(enemy.count*Math.PI/90)*4;
+        }
+        if (enemy && enemy.state=="hit") {
+            enemy.count++;
+            if (enemy.count>10) {
+                enemy.state="dead";
+                enemy.count=0;
+            }
+        }
+        enemies = enemies.filter(function(enemy){
+            if (enemy && enemy.state!="dead") return true;
+            return false;
+        });
+    }
+}
+
+//impacts of shots
+
+function hits(a,b){
+    hit = false;
+    if (b.x + b.width >= a.x && b.x < a.x + a.width){
+        if (b.y + b.height >= a.y && b.y < a.y + a.width) {
+            hit = true;
+        }
+    }
+    if (b.x <= a.x && b.x + b.width >= a.x + a.width) {
+        if (b.y <= a.y && b.y + b.height >= a.y + a.height) {
+            hit = true;
+        }
+    }
+    if (a.x <= b.x && a.x + a.width >= b.x + b.width) {
+        if (a.y <= b.y && a.y + a.height >= b.y + b.height) {
+
+        }
+    }
+    return hit;
+}
+
+function contactVerify(){
+    for (var i in shots) {
+        shot = shots[i];
+        for (var j in enemies) {
+            enemy = enemies[j];
+            if(hits(shot,enemy)){
+                enemy.state="hit";
+                enemy.count=0;
+                console.log("dispaste a una nave");
+            }
+        }
+    }
 }
