@@ -7,6 +7,9 @@ var bg,
 // define the enemies
     enemies = [],
 
+//define the variables of the enemies hots
+    enemiesShots=[],
+
 //define the variables of the game object
     game = {
         status: "init"
@@ -36,8 +39,17 @@ function frameLoop() {
     drawEnemies();
     updateEnemies();
     contactVerify();
+    drawEnemiesShots();
+    moveEnemiesShots();
 }
 
+// Random function
+function random(infr,supr){
+    var probability = supr - infr;
+    var a = Math.random()*probability;
+        a = Math.floor(a);
+    return parseInt(infr + a);
+}
 function loadMedia(){
     bg        = new Image();
     bg.src    = 'img/bg.jpg';
@@ -176,6 +188,9 @@ function updateEnemies(){
         if(enemy && enemy.state=="alive"){
             enemy.count++;
             enemy.x += Math.sin(enemy.count*Math.PI/90)*4;
+            if(random(0, enemies.length*10)==4){
+                enemiesShots.push(addEnemiesShots(enemy));
+            }
         }
         if (enemy && enemy.state=="hit") {
             enemy.count++;
@@ -188,6 +203,16 @@ function updateEnemies(){
             if (enemy && enemy.state!="dead") return true;
             return false;
         });
+    }
+
+    function addEnemiesShots(enemy){
+        return {
+            x: enemy.x,
+            y: enemy.y,
+            width:  5,
+            height: 5,
+            count: 0
+        }
     }
 }
 
@@ -221,8 +246,38 @@ function contactVerify(){
             if(hits(shot,enemy)){
                 enemy.state="hit";
                 enemy.count=0;
-                console.log("dispaste a una nave");
             }
         }
     }
+    if (spaceships.state =="hit" || spaceships.state=="dead") return;
+    for (var i in enemiesShots){
+        var shot = enemiesShots[i];
+        if(hits(shot,spaceships)){
+            spaceships.state ="hit";
+            // spaceships.count=
+            console.log("contacto");
+        }
+    }
 }
+// Add enemies shots
+function drawEnemiesShots(){
+    for (var i in enemiesShots) {
+        var shot = enemiesShots[i];
+        ctx.save();
+        ctx.fillStyle ="yellow";
+        ctx.fillRect(shot.x,shot.y,shot.width,shot.height);
+        ctx.restore();
+    }
+}
+
+function moveEnemiesShots(){
+    for (var i in enemiesShots) {
+        var shots = enemiesShots[i];
+        shots.y += 5;
+    }
+    enemiesShots = enemiesShots.filter(function(shots){
+        return shots.y < canvas.height;
+    });
+}
+
+//
