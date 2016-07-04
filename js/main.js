@@ -4,6 +4,14 @@ var canvas    = document.getElementById("game"),
 
 //define the variables of the background and images
 var bg,
+
+// Anwser Tex
+    answerText = {
+        counter  : -1,
+        title    : "",
+        subtitle : ""
+    },
+
 // define the enemies
     enemies = [],
 
@@ -23,10 +31,11 @@ var bg,
 
 // Spaceships object
 spaceships = {
-    x    :335,
-    y    : canvas.height-120,
-    width:50,
-    height:50
+    x     :335,
+    y     : canvas.height-120,
+    width :50,
+    height:50,
+    count : 0
 };
 
 //load functions of the images and background
@@ -41,6 +50,8 @@ function frameLoop() {
     contactVerify();
     drawEnemiesShots();
     moveEnemiesShots();
+    updateGameStatus();
+    DrawAnswer();
 }
 
 // Random function
@@ -117,6 +128,18 @@ function moveSpaceships(){
         }
     }else{
         keyword.fire = false;
+    }
+
+    if (spaceships.state == "hit") {
+        spaceships.count++;
+        if(spaceships.count>=0){
+            spaceships.count = 0;
+            spaceships.state="dead";
+            game.status = "game over";
+            answerText.title ="Game Over";
+            answerText.subtitle = "Press the R key to restart";
+            answerText.counter = 0;
+        }
     }
 }
 
@@ -280,4 +303,48 @@ function moveEnemiesShots(){
     });
 }
 
-//
+// Game Status
+
+function updateGameStatus(){
+    if(game.status =="playing" && enemies.length == 0){
+        game.status          = "win";
+        answerText.title     = "You Won!";
+        answerText.subtitle  = "Press the R key to restart";
+        answerText.counter   = 0;
+    }
+    if (answerText.counter >= 0) {
+        answerText.counter++;
+    }
+    if((game.status == "game over" || game.status =="win") && keyword[82]){
+        game.status = "init";
+        spaceships.state ="alive";
+        answerText.counter =-1;
+    }
+}
+
+function DrawAnswer(){
+    if(answerText.counter == -1) return;
+    var alpha = answerText.counter/50.0;
+    if(alpha > 1){
+        for (var i in enemies) {
+            delete enemies[i];
+        }
+    }
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if(game.status =="game over"){
+        ctx.fillStyle ="#FFFFFF";
+        ctx.font ="Bold 40pt Arial";
+        ctx.fillText(answerText.title,220,200);
+        ctx.font ="14pt Arial";
+        ctx.fillText(answerText.subtitle,250,250);
+    }
+
+    if(game.status =="win"){
+        ctx.fillStyle ="#FFFFFF";
+        ctx.font ="Bold 40pt Arial";
+        ctx.fillText(answerText.title,250,200);
+        ctx.font ="14pt Arial";
+        ctx.fillText(answerText.subtitle,260,250);
+    }
+}
